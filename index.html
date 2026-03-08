@@ -336,38 +336,46 @@
 
         // 省份点击区域配置 (百分比坐标，适配不同屏幕)
         const provinceAreas = {
-            xinjiang: { left: 8, top: 25, width: 18, height: 20 },
-            tibet: { left: 15, top: 50, width: 15, height: 18 },
-            qinghai: { left: 22, top: 38, width: 10, height: 10 },
-            gansu: { left: 25, top: 28, width: 12, height: 8 },
-            inner_mongolia: { left: 28, top: 15, width: 20, height: 12 },
-            heilongjiang: { left: 75, top: 5, width: 10, height: 10 },
-            jilin: { left: 78, top: 15, width: 6, height: 6 },
-            liaoning: { left: 76, top: 20, width: 6, height: 6 },
-            ningxia: { left: 32, top: 32, width: 3, height: 3 },
-            shaanxi: { left: 42, top: 35, width: 6, height: 6 },
-            sichuan: { left: 35, top: 42, width: 10, height: 10 },
-            yunnan: { left: 32, top: 55, width: 8, height: 10 },
-            guizhou: { left: 40, top: 52, width: 6, height: 6 },
-            chongqing: { left: 42, top: 48, width: 3, height: 3 },
-            beijing: { left: 58, top: 22, width: 3, height: 3 },
-            tianjin: { left: 61, top: 22, width: 2, height: 2 },
-            hebei: { left: 55, top: 20, width: 8, height: 8 },
-            shanxi: { left: 52, top: 25, width: 5, height: 6 },
-            shandong: { left: 62, top: 25, width: 6, height: 6 },
-            henan: { left: 52, top: 32, width: 6, height: 5 },
-            hubei: { left: 48, top: 38, width: 7, height: 6 },
-            anhui: { left: 58, top: 38, width: 5, height: 5 },
-            jiangsu: { left: 63, top: 35, width: 5, height: 5 },
-            shanghai: { left: 68, top: 38, width: 2, height: 2 },
-            zhejiang: { left: 66, top: 42, width: 4, height: 4 },
-            jiangxi: { left: 60, top: 43, width: 5, height: 5 },
-            fujian: { left: 68, top: 45, width: 4, height: 6 },
-            hunan: { left: 52, top: 45, width: 6, height: 6 },
-            guangdong: { left: 58, top: 55, width: 8, height: 8 },
-            guangxi: { left: 48, top: 53, width: 7, height: 7 },
-            hainan: { left: 52, top: 68, width: 4, height: 4 },
-            shaanxi: { left: 45, top: 35, width: 5, height: 5 }
+            // 西北
+            xinjiang: { left: 5, top: 20, width: 20, height: 25 },
+            gansu: { left: 25, top: 28, width: 15, height: 8 },
+            qinghai: { left: 20, top: 38, width: 12, height: 12 },
+            ningxia: { left: 35, top: 32, width: 3, height: 3 },
+            // 西南
+            tibet: { left: 12, top: 50, width: 18, height: 20 },
+            sichuan: { left: 32, top: 42, width: 12, height: 12 },
+            yunnan: { left: 28, top: 58, width: 10, height: 12 },
+            guizhou: { left: 42, top: 52, width: 8, height: 8 },
+            chongqing: { left: 40, top: 46, width: 4, height: 4 },
+            // 华北
+            inner_mongolia: { left: 25, top: 10, width: 25, height: 15 },
+            beijing: { left: 55, top: 22, width: 3, height: 3 },
+            tianjin: { left: 58, top: 22, width: 3, height: 3 },
+            hebei: { left: 52, top: 20, width: 10, height: 10 },
+            shanxi: { left: 50, top: 26, width: 5, height: 7 },
+            shandong: { left: 60, top: 26, width: 7, height: 7 },
+            // 东北
+            heilongjiang: { left: 75, top: 5, width: 12, height: 12 },
+            jilin: { left: 80, top: 15, width: 6, height: 7 },
+            liaoning: { left: 77, top: 22, width: 7, height: 7 },
+            // 华中
+            shaanxi: { left: 42, top: 34, width: 7, height: 7 },
+            henan: { left: 50, top: 34, width: 8, height: 6 },
+            hubei: { left: 45, top: 40, width: 9, height: 8 },
+            hunan: { left: 50, top: 48, width: 8, height: 8 },
+            // 华东
+            anhui: { left: 56, top: 40, width: 6, height: 6 },
+            jiangsu: { left: 62, top: 36, width: 6, height: 6 },
+            zhejiang: { left: 64, top: 43, width: 5, height: 5 },
+            shanghai: { left: 68, top: 38, width: 3, height: 3 },
+            jiangxi: { left: 58, top: 45, width: 6, height: 6 },
+            fujian: { left: 66, top: 48, width: 5, height: 7 },
+            // 华南
+            guangdong: { left: 58, top: 58, width: 10, height: 10 },
+            guangxi: { left: 48, top: 56, width: 9, height: 9 },
+            hainan: { left: 58, top: 72, width: 5, height: 5 },
+            // 台湾
+            taiwan: { left: 78, top: 55, width: 5, height: 6 }
         };
 
         // 创建省份点击区域
