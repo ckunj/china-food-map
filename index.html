@@ -18,16 +18,46 @@
         header p { font-size: 1.2em; opacity: 0.9; }
         .main-content { display: grid; grid-template-columns: 1fr 400px; gap: 30px; margin-top: 30px; }
         .map-container {
-            background: white; border-radius: 20px; padding: 30px;
+            background: white; border-radius: 20px; padding: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
         }
-        .china-map svg { width: 100%; height: auto; min-height: 500px; }
-        .province {
-            cursor: pointer; transition: all 0.3s ease;
-            fill: #e8e8e8; stroke: #ffffff; stroke-width: 0.5;
+        .china-map {
+            width: 100%;
+            position: relative;
+            background: #f5f5f5;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        .province:hover { fill: #ff6b6b; filter: brightness(1.1); }
-        .province.selected { fill: #ff4757; }
+        .china-map img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .province-overlay {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 107, 107, 0);
+            border: 2px solid transparent;
+        }
+        .province-overlay:hover {
+            background: rgba(255, 107, 107, 0.3);
+            border-color: #ff6b6b;
+        }
+        .province-overlay.selected {
+            background: rgba(255, 71, 87, 0.4);
+            border-color: #ff4757;
+        }
+        .province-label {
+            position: absolute;
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            pointer-events: none;
+            white-space: nowrap;
+        }
         .info-panel {
             background: white; border-radius: 20px; padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -64,6 +94,17 @@
             font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001;
         }
         .close:hover { color: #ff6b6b; }
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            white-space: nowrap;
+        }
         @media (max-width: 968px) {
             .main-content { grid-template-columns: 1fr; }
             .info-panel { max-height: none; }
@@ -79,56 +120,16 @@
         </header>
         <div class="main-content">
             <div class="map-container">
-                <div class="china-map">
-                    <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                            <!-- 东北 -->
-                            <path class="province" data-province="heilongjiang" d="M620,30 C680,25 720,40 750,60 L760,100 L730,140 L680,130 L640,100 L620,70 Z" title="黑龙江"/>
-                            <path class="province" data-province="jilin" d="M620,70 L640,100 L680,130 L660,160 L620,150 L600,110 Z" title="吉林"/>
-                            <path class="province" data-province="liaoning" d="M600,110 L620,150 L660,160 L640,190 L590,180 L580,140 Z" title="辽宁"/>
-                            <!-- 华北 -->
-                            <path class="province" data-province="inner_mongolia" d="M280,50 L450,40 L520,60 L580,80 L620,70 L600,110 L580,140 L540,130 L480,140 L420,130 L350,120 L300,100 L260,80 Z" title="内蒙古"/>
-                            <path class="province" data-province="beijing" d="M540,130 L555,128 L558,140 L542,142 Z" title="北京"/>
-                            <path class="province" data-province="tianjin" d="M558,140 L570,138 L572,150 L560,152 Z" title="天津"/>
-                            <path class="province" data-province="hebei" d="M520,120 L540,130 L558,140 L572,150 L560,180 L520,170 L500,150 Z" title="河北"/>
-                            <path class="province" data-province="shanxi" d="M500,150 L520,170 L560,180 L540,220 L500,210 L485,170 Z" title="山西"/>
-                            <path class="province" data-province="shandong" d="M560,180 L572,150 L590,180 L640,190 L630,230 L580,220 L540,220 L560,180 Z" title="山东"/>
-                            <!-- 西北 -->
-                            <path class="province" data-province="xinjiang" d="M50,120 C100,100 180,80 280,50 L260,80 L300,100 L350,120 L320,160 L280,200 L240,240 L200,260 L150,250 L100,220 L60,180 Z" title="新疆"/>
-                            <path class="province" data-province="gansu" d="M280,200 L320,160 L350,120 L420,130 L480,140 L460,180 L420,200 L380,210 L340,220 L300,210 Z" title="甘肃"/>
-                            <path class="province" data-province="qinghai" d="M240,240 L280,200 L300,210 L340,220 L320,260 L280,280 L240,270 Z" title="青海"/>
-                            <path class="province" data-province="ningxia" d="M380,180 L400,175 L405,195 L385,200 Z" title="宁夏"/>
-                            <path class="province" data-province="shaanxi" d="M420,200 L460,180 L485,170 L500,210 L480,260 L440,250 L420,220 Z" title="陕西"/>
-                            <!-- 华东 -->
-                            <path class="province" data-province="jiangsu" d="M580,220 L630,230 L640,270 L600,280 L570,260 Z" title="江苏"/>
-                            <path class="province" data-province="zhejiang" d="M570,260 L600,280 L640,270 L650,310 L610,320 L580,290 Z" title="浙江"/>
-                            <path class="province" data-province="anhui" d="M540,220 L570,260 L600,280 L580,310 L550,290 L530,250 Z" title="安徽"/>
-                            <path class="province" data-province="shanghai" d="M640,270 L655,268 L658,282 L643,284 Z" title="上海"/>
-                            <path class="province" data-province="fujian" d="M610,320 L650,310 L660,360 L620,380 L600,350 Z" title="福建"/>
-                            <path class="province" data-province="jiangxi" d="M550,290 L580,310 L600,350 L620,380 L580,400 L550,360 L540,320 Z" title="江西"/>
-                            <path class="province" data-province="henan" d="M485,170 L500,210 L540,220 L530,250 L550,290 L540,320 L500,300 L480,260 Z" title="河南"/>
-                            <!-- 华中 -->
-                            <path class="province" data-province="hubei" d="M480,260 L500,300 L540,320 L550,360 L520,380 L480,360 L460,320 L470,280 Z" title="湖北"/>
-                            <path class="province" data-province="hunan" d="M520,380 L550,360 L580,400 L620,380 L610,430 L560,440 L530,420 Z" title="湖南"/>
-                            <!-- 西南 -->
-                            <path class="province" data-province="sichuan" d="M340,220 L380,210 L420,220 L440,250 L480,260 L470,280 L460,320 L420,340 L380,320 L340,300 L320,260 Z" title="四川"/>
-                            <path class="province" data-province="chongqing" d="M420,300 L450,295 L455,315 L425,320 Z" title="重庆"/>
-                            <path class="province" data-province="guizhou" d="M420,340 L460,320 L480,360 L520,380 L530,420 L480,420 L450,400 L430,370 Z" title="贵州"/>
-                            <path class="province" data-province="yunnan" d="M280,280 L320,260 L340,300 L380,320 L420,340 L430,370 L450,400 L420,440 L380,460 L340,450 L300,420 L260,380 L280,340 Z" title="云南"/>
-                            <path class="province" data-province="tibet" d="M150,250 L200,260 L240,270 L280,280 L280,340 L260,380 L300,420 L340,450 L320,500 L260,520 L200,500 L150,460 L120,400 L100,340 L120,290 Z" title="西藏"/>
-                            <!-- 华南 -->
-                            <path class="province" data-province="guangdong" d="M560,440 L610,430 L620,380 L660,360 L680,400 L650,440 L600,460 L570,450 Z" title="广东"/>
-                            <path class="province" data-province="guangxi" d="M480,420 L530,420 L560,440 L570,450 L600,460 L580,490 L530,480 L490,460 Z" title="广西"/>
-                            <path class="province" data-province="hainan" d="M580,510 L610,505 L615,525 L585,530 Z" title="海南"/>
-                        </g>
-                    </svg>
+                <div class="china-map" id="chinaMap">
+                    <img src="china-map.jpg" alt="中国地图">
+                    <div id="tooltip" class="tooltip" style="display:none;"></div>
                 </div>
             </div>
             <div class="info-panel" id="infoPanel">
                 <div class="welcome-message">
                     <div class="icon">🗺️</div>
                     <h2>欢迎来到中国美食地图</h2>
-                    <p>点击地图上的任意省份<br>查看当地特色美食</p>
+                    <p>点击地图上的省份<br>查看当地特色美食</p>
                 </div>
             </div>
         </div>
@@ -324,17 +325,98 @@
                 { name: "大盘鸡", emoji: "🐔", desc: "土豆软糯" },
                 { name: "手抓饭", emoji: "🍚", desc: "香气扑鼻" },
                 { name: "馕", emoji: "🫓", desc: "传统面饼" }
+            ]},
+            taiwan: { name: "台湾", foods: [
+                { name: "蚵仔煎", emoji: "🦪", desc: "台湾特色小吃" },
+                { name: "牛肉面", emoji: "🍜", desc: "台湾风味" },
+                { name: "珍珠奶茶", emoji: "🧋", desc: "源自台湾" },
+                { name: "凤梨酥", emoji: "🥮", desc: "台湾名产" }
             ]}
         };
 
-        document.querySelectorAll('.province').forEach(province => {
-            province.addEventListener('click', function() {
-                const provinceId = this.getAttribute('data-province');
-                showProvinceInfo(provinceId);
-                document.querySelectorAll('.province').forEach(p => p.classList.remove('selected'));
-                this.classList.add('selected');
+        // 省份点击区域配置 (百分比坐标，适配不同屏幕)
+        const provinceAreas = {
+            xinjiang: { left: 8, top: 25, width: 18, height: 20 },
+            tibet: { left: 15, top: 50, width: 15, height: 18 },
+            qinghai: { left: 22, top: 38, width: 10, height: 10 },
+            gansu: { left: 25, top: 28, width: 12, height: 8 },
+            inner_mongolia: { left: 28, top: 15, width: 20, height: 12 },
+            heilongjiang: { left: 75, top: 5, width: 10, height: 10 },
+            jilin: { left: 78, top: 15, width: 6, height: 6 },
+            liaoning: { left: 76, top: 20, width: 6, height: 6 },
+            ningxia: { left: 32, top: 32, width: 3, height: 3 },
+            shaanxi: { left: 42, top: 35, width: 6, height: 6 },
+            sichuan: { left: 35, top: 42, width: 10, height: 10 },
+            yunnan: { left: 32, top: 55, width: 8, height: 10 },
+            guizhou: { left: 40, top: 52, width: 6, height: 6 },
+            chongqing: { left: 42, top: 48, width: 3, height: 3 },
+            beijing: { left: 58, top: 22, width: 3, height: 3 },
+            tianjin: { left: 61, top: 22, width: 2, height: 2 },
+            hebei: { left: 55, top: 20, width: 8, height: 8 },
+            shanxi: { left: 52, top: 25, width: 5, height: 6 },
+            shandong: { left: 62, top: 25, width: 6, height: 6 },
+            henan: { left: 52, top: 32, width: 6, height: 5 },
+            hubei: { left: 48, top: 38, width: 7, height: 6 },
+            anhui: { left: 58, top: 38, width: 5, height: 5 },
+            jiangsu: { left: 63, top: 35, width: 5, height: 5 },
+            shanghai: { left: 68, top: 38, width: 2, height: 2 },
+            zhejiang: { left: 66, top: 42, width: 4, height: 4 },
+            jiangxi: { left: 60, top: 43, width: 5, height: 5 },
+            fujian: { left: 68, top: 45, width: 4, height: 6 },
+            hunan: { left: 52, top: 45, width: 6, height: 6 },
+            guangdong: { left: 58, top: 55, width: 8, height: 8 },
+            guangxi: { left: 48, top: 53, width: 7, height: 7 },
+            hainan: { left: 52, top: 68, width: 4, height: 4 },
+            shaanxi: { left: 45, top: 35, width: 5, height: 5 }
+        };
+
+        // 创建省份点击区域
+        function createProvinceOverlays() {
+            const mapContainer = document.getElementById('chinaMap');
+            const tooltip = document.getElementById('tooltip');
+
+            Object.keys(provinceAreas).forEach(provinceId => {
+                const area = provinceAreas[provinceId];
+                const province = provinceFoods[provinceId];
+                if (!province) return;
+
+                const overlay = document.createElement('div');
+                overlay.className = 'province-overlay';
+                overlay.dataset.province = provinceId;
+                overlay.style.left = area.left + '%';
+                overlay.style.top = area.top + '%';
+                overlay.style.width = area.width + '%';
+                overlay.style.height = area.height + '%';
+                overlay.title = province.name;
+
+                // 悬停显示提示
+                overlay.addEventListener('mouseenter', (e) => {
+                    tooltip.style.display = 'block';
+                    tooltip.textContent = province.name;
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+
+                overlay.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+
+                overlay.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+
+                // 点击事件
+                overlay.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showProvinceInfo(provinceId);
+                    document.querySelectorAll('.province-overlay').forEach(p => p.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+
+                mapContainer.appendChild(overlay);
             });
-        });
+        }
 
         function showProvinceInfo(provinceId) {
             const province = provinceFoods[provinceId];
@@ -364,6 +446,9 @@
         window.onclick = function(event) {
             if (event.target == document.getElementById('imageModal')) closeModal();
         }
+
+        // 页面加载完成后创建省份区域
+        document.addEventListener('DOMContentLoaded', createProvinceOverlays);
     </script>
 </body>
 </html>
