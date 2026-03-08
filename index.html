@@ -38,12 +38,20 @@
             position: absolute;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 107, 107, 0);
-            border: 2px solid transparent;
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ff4757;
+            font-weight: bold;
+            text-shadow: 0 0 2px white;
         }
         .province-overlay:hover {
-            background: rgba(255, 107, 107, 0.3);
+            background: rgba(255, 107, 107, 0.5);
             border-color: #ff6b6b;
+            z-index: 10;
         }
         .province-overlay.selected {
             background: rgba(255, 71, 87, 0.4);
