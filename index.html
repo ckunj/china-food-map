@@ -20,43 +20,22 @@
         .map-container {
             background: white; border-radius: 20px; padding: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
         }
-        .china-map {
-            width: 100%;
-            position: relative;
-            background: #f5f5f5;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .china-map img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .province-overlay {
-            position: absolute;
+        .china-map { width: 100%; position: relative; }
+        .china-map svg { width: 100%; height: auto; }
+        .province-path {
+            fill: #e8e8e8;
+            stroke: #ffffff;
+            stroke-width: 0.5;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 107, 107, 0);
-            border: 2px solid transparent;
         }
-        .province-overlay:hover {
-            background: rgba(255, 107, 107, 0.3);
-            border-color: #ff6b6b;
+        .province-path:hover {
+            fill: #ff6b6b;
+            filter: brightness(1.1);
         }
-        .province-overlay.selected {
-            background: rgba(255, 71, 87, 0.4);
-            border-color: #ff4757;
-        }
-        .province-label {
-            position: absolute;
-            font-size: 12px;
-            color: #333;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-            pointer-events: none;
-            white-space: nowrap;
+        .province-path.selected {
+            fill: #ff4757;
         }
         .info-panel {
             background: white; border-radius: 20px; padding: 30px;
@@ -95,15 +74,9 @@
         }
         .close:hover { color: #ff6b6b; }
         .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 100;
-            white-space: nowrap;
+            position: absolute; background: rgba(0,0,0,0.8); color: white;
+            padding: 5px 10px; border-radius: 5px; font-size: 12px;
+            pointer-events: none; z-index: 100; white-space: nowrap;
         }
         @media (max-width: 968px) {
             .main-content { grid-template-columns: 1fr; }
@@ -120,8 +93,12 @@
         </header>
         <div class="main-content">
             <div class="map-container">
-                <div class="china-map" id="chinaMap">
-                    <img src="china-map.jpg" alt="中国地图">
+                <div class="china-map">
+                    <svg viewBox="0 0 1050 600" xmlns="http://www.w3.org/2000/svg">
+                        <g id="provinces">
+                            <!-- 省份 SVG 路径将通过 JS 动态生成 -->
+                        </g>
+                    </svg>
                     <div id="tooltip" class="tooltip" style="display:none;"></div>
                 </div>
             </div>
@@ -139,6 +116,7 @@
         <div class="modal-content" id="modalImage"></div>
     </div>
     <script>
+        // 各省美食数据
         const provinceFoods = {
             beijing: { name: "北京", foods: [
                 { name: "北京烤鸭", emoji: "🦆", desc: "皮脆肉嫩" },
@@ -334,94 +312,80 @@
             ]}
         };
 
-        // 省份点击区域配置 (基于 GeoJSON 行政中心坐标)
-        const provinceAreas = {
-            // 西北
-            xinjiang: { left: 24, top: 26, width: 12, height: 10 }, // 新疆
-            gansu: { left: 50, top: 48, width: 8, height: 7 }, // 甘肃
-            qinghai: { left: 46, top: 47, width: 8, height: 7 }, // 青海
-            ningxia: { left: 54, top: 42, width: 3, height: 3 }, // 宁夏
-            // 西南
-            tibet: { left: 29, top: 67, width: 12, height: 10 }, // 西藏
-            sichuan: { left: 50, top: 64, width: 8, height: 7 }, // 四川
-            yunnan: { left: 48, top: 80, width: 6, height: 6 }, // 云南
-            guizhou: { left: 54, top: 75, width: 5, height: 5 }, // 贵州
-            chongqing: { left: 54, top: 67, width: 3, height: 3 }, // 重庆
-            // 华北
-            inner_mongolia: { left: 62, top: 35, width: 15, height: 8 }, // 内蒙古
-            beijing: { left: 70, top: 37, width: 3, height: 3 }, // 北京
-            tianjin: { left: 71, top: 40, width: 3, height: 3 }, // 天津
-            hebei: { left: 67, top: 43, width: 6, height: 6 }, // 河北
-            shanxi: { left: 64, top: 43, width: 4, height: 5 }, // 山西
-            shandong: { left: 71, top: 47, width: 5, height: 5 }, // 山东
-            // 东北
-            heilongjiang: { left: 86, top: 21, width: 8, height: 7 }, // 黑龙江
-            jilin: { left: 84, top: 26, width: 5, height: 5 }, // 吉林
-            liaoning: { left: 81, top: 32, width: 5, height: 5 }, // 辽宁
-            // 华中
-            shaanxi: { left: 58, top: 54, width: 5, height: 5 }, // 陕西
-            henan: { left: 66, top: 52, width: 5, height: 5 }, // 河南
-            hubei: { left: 67, top: 64, width: 6, height: 6 }, // 湖北
-            hunan: { left: 64, top: 71, width: 6, height: 6 }, // 湖南
-            // 华东
-            anhui: { left: 71, top: 61, width: 5, height: 5 }, // 安徽
-            jiangsu: { left: 74, top: 60, width: 5, height: 5 }, // 江苏
-            zhejiang: { left: 76, top: 65, width: 5, height: 5 }, // 浙江
-            shanghai: { left: 78, top: 62, width: 3, height: 3 }, // 上海
-            jiangxi: { left: 69, top: 70, width: 5, height: 5 }, // 江西
-            fujian: { left: 75, top: 77, width: 5, height: 5 }, // 福建
-            // 华南
-            guangdong: { left: 65, top: 85, width: 6, height: 6 }, // 广东
-            guangxi: { left: 57, top: 86, width: 6, height: 6 }, // 广西
-            hainan: { left: 60, top: 95, width: 4, height: 4 }, // 海南
-            taiwan: { left: 78, top: 84, width: 5, height: 5 } // 台湾
+        // 简化的省份路径（使用多边形近似省份轮廓）
+        const provincePaths = {
+            xinjiang: "M100,150 L250,130 L280,180 L250,250 L200,280 L150,250 L100,200 Z",
+            tibet: "M150,280 L250,280 L300,320 L280,380 L220,400 L180,380 L150,320 Z",
+            qinghai: "M250,250 L300,240 L320,280 L300,320 L250,300 Z",
+            gansu: "M280,180 L350,170 L380,200 L350,240 L300,240 L280,200 Z",
+            ningxia: "M340,200 L360,195 L365,215 L345,220 Z",
+            inner_mongolia: "M300,100 L500,90 L550,120 L520,160 L450,170 L350,170 L300,140 Z",
+            heilongjiang: "M650,50 L750,40 L780,80 L750,130 L680,120 L650,80 Z",
+            jilin: "M680,120 L750,130 L740,170 L700,180 L680,150 Z",
+            liaoning: "M700,180 L740,170 L760,210 L730,240 L700,220 Z",
+            beijing: "M520,140 L540,135 L545,155 L525,160 Z",
+            tianjin: "M545,155 L560,150 L565,170 L550,175 Z",
+            hebei: "M500,130 L580,120 L600,160 L570,200 L520,190 L500,160 Z",
+            shanxi: "M480,170 L520,160 L540,200 L520,240 L480,230 Z",
+            shandong: "M570,200 L630,190 L650,230 L620,270 L580,260 Z",
+            henan: "M480,230 L540,220 L560,260 L530,290 L490,280 Z",
+            shaanxi: "M420,200 L480,190 L500,230 L470,270 L430,260 Z",
+            sichuan: "M350,240 L430,230 L470,270 L450,330 L400,350 L360,320 Z",
+            chongqing: "M430,300 L460,295 L465,320 L435,325 Z",
+            guizhou: "M420,340 L470,330 L490,370 L460,400 L420,380 Z",
+            yunnan: "M360,350 L420,340 L450,380 L430,430 L380,440 L350,400 Z",
+            guangxi: "M450,400 L520,390 L540,430 L510,470 L460,460 Z",
+            guangdong: "M540,430 L620,420 L640,460 L610,500 L560,490 Z",
+            hainan: "M580,520 L610,515 L615,540 L585,545 Z",
+            hunan: "M490,340 L550,330 L570,370 L540,410 L500,400 Z",
+            hubei: "M450,290 L520,280 L540,320 L510,360 L460,350 Z",
+            jiangxi: "M540,340 L590,330 L610,370 L580,410 L540,390 Z",
+            anhui: "M560,280 L610,270 L630,310 L600,350 L560,340 Z",
+            jiangsu: "M600,270 L650,260 L670,300 L640,340 L600,330 Z",
+            zhejiang: "M620,340 L670,330 L690,370 L660,400 L620,380 Z",
+            shanghai: "M670,300 L685,295 L690,315 L675,320 Z",
+            fujian: "M640,380 L680,370 L700,420 L670,450 L640,430 Z",
+            taiwan: "M720,420 L750,410 L760,450 L730,460 Z"
         };
 
-        // 创建省份点击区域
-        function createProvinceOverlays() {
-            const mapContainer = document.getElementById('chinaMap');
+        // 创建省份 SVG 路径
+        function createProvincePaths() {
+            const provincesGroup = document.getElementById('provinces');
             const tooltip = document.getElementById('tooltip');
 
-            Object.keys(provinceAreas).forEach(provinceId => {
-                const area = provinceAreas[provinceId];
+            Object.keys(provincePaths).forEach(provinceId => {
                 const province = provinceFoods[provinceId];
                 if (!province) return;
 
-                const overlay = document.createElement('div');
-                overlay.className = 'province-overlay';
-                overlay.dataset.province = provinceId;
-                overlay.style.left = area.left + '%';
-                overlay.style.top = area.top + '%';
-                overlay.style.width = area.width + '%';
-                overlay.style.height = area.height + '%';
-                overlay.title = province.name;
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", provincePaths[provinceId]);
+                path.setAttribute("class", "province-path");
+                path.setAttribute("data-province", provinceId);
+                path.setAttribute("title", province.name);
 
-                // 悬停显示提示
-                overlay.addEventListener('mouseenter', (e) => {
+                // 悬停提示
+                path.addEventListener('mouseenter', (e) => {
                     tooltip.style.display = 'block';
                     tooltip.textContent = province.name;
-                    tooltip.style.left = (e.pageX + 10) + 'px';
-                    tooltip.style.top = (e.pageY + 10) + 'px';
                 });
-
-                overlay.addEventListener('mousemove', (e) => {
-                    tooltip.style.left = (e.pageX + 10) + 'px';
-                    tooltip.style.top = (e.pageY + 10) + 'px';
+                path.addEventListener('mousemove', (e) => {
+                    const rect = e.target.getBoundingClientRect();
+                    tooltip.style.left = (e.clientX + 10) + 'px';
+                    tooltip.style.top = (e.clientY + 10) + 'px';
                 });
-
-                overlay.addEventListener('mouseleave', () => {
+                path.addEventListener('mouseleave', () => {
                     tooltip.style.display = 'none';
                 });
 
                 // 点击事件
-                overlay.addEventListener('click', function(e) {
+                path.addEventListener('click', function(e) {
                     e.stopPropagation();
                     showProvinceInfo(provinceId);
-                    document.querySelectorAll('.province-overlay').forEach(p => p.classList.remove('selected'));
+                    document.querySelectorAll('.province-path').forEach(p => p.classList.remove('selected'));
                     this.classList.add('selected');
                 });
 
-                mapContainer.appendChild(overlay);
+                provincesGroup.appendChild(path);
             });
         }
 
@@ -454,8 +418,8 @@
             if (event.target == document.getElementById('imageModal')) closeModal();
         }
 
-        // 页面加载完成后创建省份区域
-        document.addEventListener('DOMContentLoaded', createProvinceOverlays);
+        // 页面加载完成后创建省份路径
+        document.addEventListener('DOMContentLoaded', createProvincePaths);
     </script>
 </body>
 </html>
