@@ -5,221 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中国美食地图 - 探索各地特色美食</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            padding: 30px 0;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; color: white; padding: 30px 0; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        header p { font-size: 1.2em; opacity: 0.9; }
+        .main-content { display: grid; grid-template-columns: 1fr 400px; gap: 30px; margin-top: 30px; }
         .map-container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
+            background: white; border-radius: 20px; padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        .china-map {
-            width: 100%;
-            max-width: 700px;
-            height: auto;
-        }
-
+        .china-map svg { width: 100%; height: auto; min-height: 500px; }
         .province {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            fill: #e8e8e8;
-            stroke: #ffffff;
-            stroke-width: 0.5;
+            cursor: pointer; transition: all 0.3s ease;
+            fill: #e8e8e8; stroke: #ffffff; stroke-width: 0.5;
         }
-
-        .province:hover {
-            fill: #ff6b6b;
-            filter: brightness(1.1);
-        }
-
-        .province.selected {
-            fill: #ff4757;
-        }
-
+        .province:hover { fill: #ff6b6b; filter: brightness(1.1); }
+        .province.selected { fill: #ff4757; }
         .info-panel {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
+            background: white; border-radius: 20px; padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow-y: auto;
-            max-height: 600px;
+            overflow-y: auto; max-height: 600px;
         }
-
-        .info-panel h2 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #ff6b6b;
-        }
-
-        .food-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
-        }
-
+        .info-panel h2 { color: #333; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #ff6b6b; }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
         .food-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
+            background: #f8f9fa; border-radius: 15px; overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer;
         }
-
-        .food-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
+        .food-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .food-image {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
+            width: 100%; height: 120px;
             background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3em;
+            display: flex; align-items: center; justify-content: center; font-size: 3em;
         }
-
-        .food-name {
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-            font-size: 1em;
-        }
-
-        .food-desc {
-            padding: 0 15px 15px;
-            font-size: 0.85em;
-            color: #666;
-            line-height: 1.4;
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 50px 20px;
-            color: #666;
-        }
-
-        .welcome-message .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-        }
-
-        /* SVG 地图样式 */
-        svg {
-            width: 100%;
-            height: auto;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 968px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .info-panel {
-                max-height: none;
-            }
-
-            header h1 {
-                font-size: 1.8em;
-            }
-        }
-
-        /* 图片模态框 */
+        .food-name { padding: 15px; text-align: center; font-weight: bold; color: #333; }
+        .food-desc { padding: 0 15px 15px; font-size: 0.85em; color: #666; line-height: 1.4; }
+        .welcome-message { text-align: center; padding: 50px 20px; color: #666; }
+        .welcome-message .icon { font-size: 4em; margin-bottom: 20px; }
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center;
         }
-
         .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
             background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15em;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15em; border-radius: 10px; min-width: 300px; min-height: 300px;
         }
-
         .close {
-            position: absolute;
-            top: 20px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 1001;
+            position: absolute; top: 20px; right: 35px; color: #f1f1f1;
+            font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001;
         }
-
-        .close:hover {
-            color: #ff6b6b;
-        }
-
-        /* 南海诸岛插图 */
-        .south-china-sea {
-            position: absolute;
-            bottom: 20px;
-            right: 40px;
-            width: 150px;
+        .close:hover { color: #ff6b6b; }
+        @media (max-width: 968px) {
+            .main-content { grid-template-columns: 1fr; }
+            .info-panel { max-height: none; }
+            header h1 { font-size: 1.8em; }
         }
     </style>
 </head>
@@ -229,14 +77,53 @@
             <h1>🥢 中国美食地图</h1>
             <p>点击地图上的省份，探索各地特色美食</p>
         </header>
-
         <div class="main-content">
             <div class="map-container">
-                <div class="china-map" id="chinaMap">
-                    <!-- 中国地图 SVG -->
+                <div class="china-map">
+                    <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <!-- 东北 -->
+                            <path class="province" data-province="heilongjiang" d="M620,30 C680,25 720,40 750,60 L760,100 L730,140 L680,130 L640,100 L620,70 Z" title="黑龙江"/>
+                            <path class="province" data-province="jilin" d="M620,70 L640,100 L680,130 L660,160 L620,150 L600,110 Z" title="吉林"/>
+                            <path class="province" data-province="liaoning" d="M600,110 L620,150 L660,160 L640,190 L590,180 L580,140 Z" title="辽宁"/>
+                            <!-- 华北 -->
+                            <path class="province" data-province="inner_mongolia" d="M280,50 L450,40 L520,60 L580,80 L620,70 L600,110 L580,140 L540,130 L480,140 L420,130 L350,120 L300,100 L260,80 Z" title="内蒙古"/>
+                            <path class="province" data-province="beijing" d="M540,130 L555,128 L558,140 L542,142 Z" title="北京"/>
+                            <path class="province" data-province="tianjin" d="M558,140 L570,138 L572,150 L560,152 Z" title="天津"/>
+                            <path class="province" data-province="hebei" d="M520,120 L540,130 L558,140 L572,150 L560,180 L520,170 L500,150 Z" title="河北"/>
+                            <path class="province" data-province="shanxi" d="M500,150 L520,170 L560,180 L540,220 L500,210 L485,170 Z" title="山西"/>
+                            <path class="province" data-province="shandong" d="M560,180 L572,150 L590,180 L640,190 L630,230 L580,220 L540,220 L560,180 Z" title="山东"/>
+                            <!-- 西北 -->
+                            <path class="province" data-province="xinjiang" d="M50,120 C100,100 180,80 280,50 L260,80 L300,100 L350,120 L320,160 L280,200 L240,240 L200,260 L150,250 L100,220 L60,180 Z" title="新疆"/>
+                            <path class="province" data-province="gansu" d="M280,200 L320,160 L350,120 L420,130 L480,140 L460,180 L420,200 L380,210 L340,220 L300,210 Z" title="甘肃"/>
+                            <path class="province" data-province="qinghai" d="M240,240 L280,200 L300,210 L340,220 L320,260 L280,280 L240,270 Z" title="青海"/>
+                            <path class="province" data-province="ningxia" d="M380,180 L400,175 L405,195 L385,200 Z" title="宁夏"/>
+                            <path class="province" data-province="shaanxi" d="M420,200 L460,180 L485,170 L500,210 L480,260 L440,250 L420,220 Z" title="陕西"/>
+                            <!-- 华东 -->
+                            <path class="province" data-province="jiangsu" d="M580,220 L630,230 L640,270 L600,280 L570,260 Z" title="江苏"/>
+                            <path class="province" data-province="zhejiang" d="M570,260 L600,280 L640,270 L650,310 L610,320 L580,290 Z" title="浙江"/>
+                            <path class="province" data-province="anhui" d="M540,220 L570,260 L600,280 L580,310 L550,290 L530,250 Z" title="安徽"/>
+                            <path class="province" data-province="shanghai" d="M640,270 L655,268 L658,282 L643,284 Z" title="上海"/>
+                            <path class="province" data-province="fujian" d="M610,320 L650,310 L660,360 L620,380 L600,350 Z" title="福建"/>
+                            <path class="province" data-province="jiangxi" d="M550,290 L580,310 L600,350 L620,380 L580,400 L550,360 L540,320 Z" title="江西"/>
+                            <path class="province" data-province="henan" d="M485,170 L500,210 L540,220 L530,250 L550,290 L540,320 L500,300 L480,260 Z" title="河南"/>
+                            <!-- 华中 -->
+                            <path class="province" data-province="hubei" d="M480,260 L500,300 L540,320 L550,360 L520,380 L480,360 L460,320 L470,280 Z" title="湖北"/>
+                            <path class="province" data-province="hunan" d="M520,380 L550,360 L580,400 L620,380 L610,430 L560,440 L530,420 Z" title="湖南"/>
+                            <!-- 西南 -->
+                            <path class="province" data-province="sichuan" d="M340,220 L380,210 L420,220 L440,250 L480,260 L470,280 L460,320 L420,340 L380,320 L340,300 L320,260 Z" title="四川"/>
+                            <path class="province" data-province="chongqing" d="M420,300 L450,295 L455,315 L425,320 Z" title="重庆"/>
+                            <path class="province" data-province="guizhou" d="M420,340 L460,320 L480,360 L520,380 L530,420 L480,420 L450,400 L430,370 Z" title="贵州"/>
+                            <path class="province" data-province="yunnan" d="M280,280 L320,260 L340,300 L380,320 L420,340 L430,370 L450,400 L420,440 L380,460 L340,450 L300,420 L260,380 L280,340 Z" title="云南"/>
+                            <path class="province" data-province="tibet" d="M150,250 L200,260 L240,270 L280,280 L280,340 L260,380 L300,420 L340,450 L320,500 L260,520 L200,500 L150,460 L120,400 L100,340 L120,290 Z" title="西藏"/>
+                            <!-- 华南 -->
+                            <path class="province" data-province="guangdong" d="M560,440 L610,430 L620,380 L660,360 L680,400 L650,440 L600,460 L570,450 Z" title="广东"/>
+                            <path class="province" data-province="guangxi" d="M480,420 L530,420 L560,440 L570,450 L600,460 L580,490 L530,480 L490,460 Z" title="广西"/>
+                            <path class="province" data-province="hainan" d="M580,510 L610,505 L615,525 L585,530 Z" title="海南"/>
+                        </g>
+                    </svg>
                 </div>
             </div>
-
             <div class="info-panel" id="infoPanel">
                 <div class="welcome-message">
                     <div class="icon">🗺️</div>
@@ -246,50 +133,46 @@
             </div>
         </div>
     </div>
-
-    <!-- 图片放大模态框 -->
     <div id="imageModal" class="modal">
         <span class="close" onclick="closeModal()">&times;</span>
         <div class="modal-content" id="modalImage"></div>
     </div>
-
     <script>
-        // 各省美食数据
         const provinceFoods = {
             beijing: { name: "北京", foods: [
-                { name: "北京烤鸭", emoji: "🦆", desc: "皮脆肉嫩，色泽红润" },
+                { name: "北京烤鸭", emoji: "🦆", desc: "皮脆肉嫩" },
                 { name: "炸酱面", emoji: "🍜", desc: "老北京传统面食" },
                 { name: "豆汁儿", emoji: "🥛", desc: "特色发酵豆制品" },
                 { name: "驴打滚", emoji: "🍰", desc: "糯米豆沙卷" }
             ]},
             tianjin: { name: "天津", foods: [
-                { name: "狗不理包子", emoji: "🥟", desc: "皮薄馅大，味道鲜美" },
-                { name: "煎饼果子", emoji: "🥞", desc: "绿豆面糊，夹油条" },
-                { name: "耳朵眼炸糕", emoji: "🍩", desc: "外酥里嫩，豆沙馅" },
+                { name: "狗不理包子", emoji: "🥟", desc: "皮薄馅大" },
+                { name: "煎饼果子", emoji: "🥞", desc: "绿豆面糊夹油条" },
+                { name: "耳朵眼炸糕", emoji: "🍩", desc: "外酥里嫩" },
                 { name: "麻花", emoji: "🥐", desc: "酥脆香甜" }
             ]},
             hebei: { name: "河北", foods: [
-                { name: "驴肉火烧", emoji: "🫓", desc: "保定特色，肉香饼酥" },
-                { name: "正定八大碗", emoji: "🍲", desc: "传统宴席菜" },
+                { name: "驴肉火烧", emoji: "🫓", desc: "保定特色" },
+                { name: "正定八大碗", emoji: "🍲", desc: "传统宴席" },
                 { name: "承德避暑山庄菜", emoji: "🍽️", desc: "宫廷风味" },
                 { name: "唐山麻糖", emoji: "🍬", desc: "酥脆香甜" }
             ]},
             shanxi: { name: "山西", foods: [
-                { name: "刀削面", emoji: "🍜", desc: "面条劲道，卤香浓郁" },
-                { name: "平遥牛肉", emoji: "🥩", desc: "色泽红润，肉质鲜嫩" },
-                { name: "莜面栲栳栳", emoji: "🍜", desc: "莜面制成，蘸料食用" },
-                { name: "陈醋", emoji: "🍶", desc: "中国四大名醋之首" }
+                { name: "刀削面", emoji: "🍜", desc: "面条劲道" },
+                { name: "平遥牛肉", emoji: "🥩", desc: "色泽红润" },
+                { name: "莜面栲栳栳", emoji: "🍜", desc: "莜面制成" },
+                { name: "陈醋", emoji: "🍶", desc: "四大名醋之首" }
             ]},
             inner_mongolia: { name: "内蒙古", foods: [
-                { name: "手扒羊肉", emoji: "🐑", desc: "原汁原味，肉质鲜嫩" },
-                { name: "烤全羊", emoji: "🐑", desc: "宴席大菜，外焦里嫩" },
-                { name: "奶茶", emoji: "🧋", desc: "咸香浓郁，蒙古族特色" },
+                { name: "手扒羊肉", emoji: "🐑", desc: "原汁原味" },
+                { name: "烤全羊", emoji: "🐑", desc: "宴席大菜" },
+                { name: "奶茶", emoji: "🧋", desc: "咸香浓郁" },
                 { name: "奶豆腐", emoji: "🧀", desc: "奶香浓郁" }
             ]},
             liaoning: { name: "辽宁", foods: [
-                { name: "锅包肉", emoji: "🥩", desc: "外酥里嫩，酸甜可口" },
+                { name: "锅包肉", emoji: "🥩", desc: "外酥里嫩" },
                 { name: "小鸡炖蘑菇", emoji: "🍲", desc: "东北家常菜" },
-                { name: "猪肉炖粉条", emoji: "🍖", desc: "东北四大炖之首" },
+                { name: "猪肉炖粉条", emoji: "🍖", desc: "东北四大炖" },
                 { name: "大连海鲜", emoji: "🦐", desc: "新鲜海产" }
             ]},
             jilin: { name: "吉林", foods: [
@@ -302,11 +185,11 @@
                 { name: "哈尔滨红肠", emoji: "🌭", desc: "俄式风味" },
                 { name: "锅包肉", emoji: "🥩", desc: "起源哈尔滨" },
                 { name: "得莫利炖鱼", emoji: "🐟", desc: "鱼肉鲜嫩" },
-                { name: "大列巴", emoji: "🍞", desc: "俄式大面包" }
+                { name: "大列巴", emoji: "🍞", desc: "俄式面包" }
             ]},
             shanghai: { name: "上海", foods: [
                 { name: "小笼包", emoji: "🥟", desc: "皮薄汁多" },
-                { name: "生煎包", emoji: "🥠", desc: "底部金黄酥脆" },
+                { name: "生煎包", emoji: "🥠", desc: "底部酥脆" },
                 { name: "红烧肉", emoji: "🥩", desc: "浓油赤酱" },
                 { name: "蟹粉豆腐", emoji: "🦀", desc: "鲜嫩滑爽" }
             ]},
@@ -444,145 +327,43 @@
             ]}
         };
 
-        // 中国地图 SVG（真实轮廓简化版）
-        const chinaMapSVG = `
-        <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" class="china-map">
-            <defs>
-                <filter id="shadow">
-                    <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
-                </filter>
-            </defs>
-            <g filter="url(#shadow)">
-                <!-- 东北三省 -->
-                <path class="province" data-province="heilongjiang" d="M620,30 C680,25 720,40 750,60 L760,100 L730,140 L680,130 L640,100 L620,70 Z" title="黑龙江"/>
-                <path class="province" data-province="jilin" d="M620,70 L640,100 L680,130 L660,160 L620,150 L600,110 Z" title="吉林"/>
-                <path class="province" data-province="liaoning" d="M600,110 L620,150 L660,160 L640,190 L590,180 L580,140 Z" title="辽宁"/>
-                
-                <!-- 华北地区 -->
-                <path class="province" data-province="inner_mongolia" d="M280,50 L450,40 L520,60 L580,80 L620,70 L600,110 L580,140 L540,130 L480,140 L420,130 L350,120 L300,100 L260,80 Z" title="内蒙古"/>
-                <path class="province" data-province="beijing" d="M540,130 L555,128 L558,140 L542,142 Z" title="北京"/>
-                <path class="province" data-province="tianjin" d="M558,140 L570,138 L572,150 L560,152 Z" title="天津"/>
-                <path class="province" data-province="hebei" d="M520,120 L540,130 L558,140 L572,150 L560,180 L520,170 L500,150 Z" title="河北"/>
-                <path class="province" data-province="shanxi" d="M500,150 L520,170 L560,180 L540,220 L500,210 L485,170 Z" title="山西"/>
-                <path class="province" data-province="shandong" d="M560,180 L572,150 L590,180 L640,190 L630,230 L580,220 L540,220 L560,180 Z" title="山东"/>
-                
-                <!-- 西北地区 -->
-                <path class="province" data-province="xinjiang" d="M50,120 C100,100 180,80 280,50 L260,80 L300,100 L350,120 L320,160 L280,200 L240,240 L200,260 L150,250 L100,220 L60,180 Z" title="新疆"/>
-                <path class="province" data-province="gansu" d="M280,200 L320,160 L350,120 L420,130 L480,140 L460,180 L420,200 L380,210 L340,220 L300,210 Z" title="甘肃"/>
-                <path class="province" data-province="qinghai" d="M240,240 L280,200 L300,210 L340,220 L320,260 L280,280 L240,270 Z" title="青海"/>
-                <path class="province" data-province="ningxia" d="M380,180 L400,175 L405,195 L385,200 Z" title="宁夏"/>
-                <path class="province" data-province="shaanxi" d="M420,200 L460,180 L485,170 L500,210 L480,260 L440,250 L420,220 Z" title="陕西"/>
-                
-                <!-- 华东地区 -->
-                <path class="province" data-province="jiangsu" d="M580,220 L630,230 L640,270 L600,280 L570,260 Z" title="江苏"/>
-                <path class="province" data-province="zhejiang" d="M570,260 L600,280 L640,270 L650,310 L610,320 L580,290 Z" title="浙江"/>
-                <path class="province" data-province="anhui" d="M540,220 L570,260 L600,280 L580,310 L550,290 L530,250 Z" title="安徽"/>
-                <path class="province" data-province="shanghai" d="M640,270 L655,268 L658,282 L643,284 Z" title="上海"/>
-                <path class="province" data-province="fujian" d="M610,320 L650,310 L660,360 L620,380 L600,350 Z" title="福建"/>
-                <path class="province" data-province="jiangxi" d="M550,290 L580,310 L600,350 L620,380 L580,400 L550,360 L540,320 Z" title="江西"/>
-                <path class="province" data-province="henan" d="M485,170 L500,210 L540,220 L530,250 L550,290 L540,320 L500,300 L480,260 Z" title="河南"/>
-                
-                <!-- 华中地区 -->
-                <path class="province" data-province="hubei" d="M480,260 L500,300 L540,320 L550,360 L520,380 L480,360 L460,320 L470,280 Z" title="湖北"/>
-                <path class="province" data-province="hunan" d="M520,380 L550,360 L580,400 L620,380 L610,430 L560,440 L530,420 Z" title="湖南"/>
-                
-                <!-- 西南地区 -->
-                <path class="province" data-province="sichuan" d="M340,220 L380,210 L420,220 L440,250 L480,260 L470,280 L460,320 L420,340 L380,320 L340,300 L320,260 Z" title="四川"/>
-                <path class="province" data-province="chongqing" d="M420,300 L450,295 L455,315 L425,320 Z" title="重庆"/>
-                <path class="province" data-province="guizhou" d="M420,340 L460,320 L480,360 L520,380 L530,420 L480,420 L450,400 L430,370 Z" title="贵州"/>
-                <path class="province" data-province="yunnan" d="M280,280 L320,260 L340,300 L380,320 L420,340 L430,370 L450,400 L420,440 L380,460 L340,450 L300,420 L260,380 L280,340 Z" title="云南"/>
-                <path class="province" data-province="tibet" d="M150,250 L200,260 L240,270 L280,280 L280,340 L260,380 L300,420 L340,450 L320,500 L260,520 L200,500 L150,460 L120,400 L100,340 L120,290 Z" title="西藏"/>
-                
-                <!-- 华南地区 -->
-                <path class="province" data-province="guangdong" d="M560,440 L610,430 L620,380 L660,360 L680,400 L650,440 L600,460 L570,450 Z" title="广东"/>
-                <path class="province" data-province="guangxi" d="M480,420 L530,420 L560,440 L570,450 L600,460 L580,490 L530,480 L490,460 Z" title="广西"/>
-                <path class="province" data-province="hainan" d="M580,510 L610,505 L615,525 L585,530 Z" title="海南"/>
-                
-                <!-- 南海诸岛示意 -->
-                <g transform="translate(650,520)" opacity="0.6">
-                    <ellipse cx="20" cy="10" rx="15" ry="8" fill="#e8e8e8" stroke="#fff" stroke-width="0.3"/>
-                    <ellipse cx="40" cy="15" rx="12" ry="6" fill="#e8e8e8" stroke="#fff" stroke-width="0.3"/>
-                    <ellipse cx="30" cy="25" rx="10" ry="5" fill="#e8e8e8" stroke="#fff" stroke-width="0.3"/>
-                </g>
-            </g>
-        </svg>
-        `;
-
-        // 初始化地图
-        function initMap() {
-            document.getElementById('chinaMap').innerHTML = chinaMapSVG;
-            
-            // 添加点击事件
-            document.querySelectorAll('.province').forEach(province => {
-                province.addEventListener('click', function() {
-                    const provinceId = this.getAttribute('data-province');
-                    showProvinceInfo(provinceId);
-                    
-                    // 移除其他选中状态
-                    document.querySelectorAll('.province').forEach(p => p.classList.remove('selected'));
-                    this.classList.add('selected');
-                });
+        document.querySelectorAll('.province').forEach(province => {
+            province.addEventListener('click', function() {
+                const provinceId = this.getAttribute('data-province');
+                showProvinceInfo(provinceId);
+                document.querySelectorAll('.province').forEach(p => p.classList.remove('selected'));
+                this.classList.add('selected');
             });
-        }
+        });
 
-        // 显示省份美食信息
         function showProvinceInfo(provinceId) {
             const province = provinceFoods[provinceId];
             const infoPanel = document.getElementById('infoPanel');
-            
-            if (!province) {
-                infoPanel.innerHTML = `
-                    <div class="welcome-message">
-                        <h2>暂无数据</h2>
-                        <p>该省份的美食数据正在收集中...</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let foodsHTML = '';
-            province.foods.forEach((food, index) => {
-                foodsHTML += `
-                    <div class="food-card" onclick="showFoodImage('${food.emoji}', '${food.name}')">
-                        <div class="food-image">${food.emoji}</div>
-                        <div class="food-name">${food.name}</div>
-                        <div class="food-desc">${food.desc}</div>
-                    </div>
-                `;
-            });
-            
-            infoPanel.innerHTML = `
-                <h2>📍 ${province.name}美食</h2>
-                <div class="food-grid">
-                    ${foodsHTML}
+            if (!province) return;
+            let foodsHTML = province.foods.map(food => `
+                <div class="food-card" onclick="showFoodImage('${food.emoji}', '${food.name}')">
+                    <div class="food-image">${food.emoji}</div>
+                    <div class="food-name">${food.name}</div>
+                    <div class="food-desc">${food.desc}</div>
                 </div>
-            `;
+            `).join('');
+            infoPanel.innerHTML = `<h2>📍 ${province.name}美食</h2><div class="food-grid">${foodsHTML}</div>`;
         }
 
-        // 显示美食图片（模态框）
         function showFoodImage(emoji, name) {
             const modal = document.getElementById('imageModal');
             const modalContent = document.getElementById('modalImage');
             modal.style.display = 'flex';
             modalContent.innerHTML = emoji;
-            modalContent.setAttribute('data-name', name);
         }
 
-        // 关闭模态框
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
         }
 
-        // 点击模态框外部关闭
         window.onclick = function(event) {
-            const modal = document.getElementById('imageModal');
-            if (event.target == modal) {
-                closeModal();
-            }
+            if (event.target == document.getElementById('imageModal')) closeModal();
         }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initMap);
     </script>
 </body>
 </html>
