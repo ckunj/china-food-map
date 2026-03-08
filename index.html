@@ -3,86 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中国美食地图 - 探索各地特色美食</title>
+    <title>中国美食地图</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-family: 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            min-height: 100vh; padding: 20px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
         header { text-align: center; color: white; padding: 30px 0; }
-        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        header p { font-size: 1.2em; opacity: 0.9; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
         .main-content { display: grid; grid-template-columns: 1fr 400px; gap: 30px; margin-top: 30px; }
-        .map-container {
-            background: white; border-radius: 20px; padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+        .map-container { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .china-map { width: 100%; position: relative; }
-        .china-map svg { width: 100%; height: auto; }
+        .china-map img { width: 100%; height: auto; display: block; }
+        .province-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
         .province-path {
-            fill: #e8e8e8;
-            stroke: #ffffff;
+            fill: rgba(255,255,255,0.1);
+            stroke: rgba(255,255,255,0.5);
             stroke-width: 0.5;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .province-path:hover {
-            fill: #ff6b6b;
-            filter: brightness(1.1);
-        }
-        .province-path.selected {
-            fill: #ff4757;
-        }
-        .info-panel {
-            background: white; border-radius: 20px; padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow-y: auto; max-height: 600px;
-        }
+        .province-path:hover { fill: rgba(255,107,107,0.5); stroke: #ff6b6b; }
+        .province-path.selected { fill: rgba(255,71,87,0.6); stroke: #ff4757; }
+        .info-panel { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow-y: auto; max-height: 600px; }
         .info-panel h2 { color: #333; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #ff6b6b; }
         .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        .food-card {
-            background: #f8f9fa; border-radius: 15px; overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer;
-        }
+        .food-card { background: #f8f9fa; border-radius: 15px; overflow: hidden; transition: transform 0.3s; cursor: pointer; }
         .food-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .food-image {
-            width: 100%; height: 120px;
-            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%);
-            display: flex; align-items: center; justify-content: center; font-size: 3em;
-        }
+        .food-image { width: 100%; height: 120px; background: linear-gradient(45deg, #ff9a9e, #fad0c4); display: flex; align-items: center; justify-content: center; font-size: 3em; }
         .food-name { padding: 15px; text-align: center; font-weight: bold; color: #333; }
         .food-desc { padding: 0 15px 15px; font-size: 0.85em; color: #666; line-height: 1.4; }
         .welcome-message { text-align: center; padding: 50px 20px; color: #666; }
         .welcome-message .icon { font-size: 4em; margin-bottom: 20px; }
-        .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 15em; border-radius: 10px; min-width: 300px; min-height: 300px;
-        }
-        .close {
-            position: absolute; top: 20px; right: 35px; color: #f1f1f1;
-            font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001;
-        }
+        .tooltip { position: absolute; background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; pointer-events: none; z-index: 100; white-space: nowrap; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: linear-gradient(45deg, #ff9a9e, #fad0c4); display: flex; align-items: center; justify-content: center; font-size: 15em; border-radius: 10px; min-width: 300px; min-height: 300px; }
+        .close { position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; }
         .close:hover { color: #ff6b6b; }
-        .tooltip {
-            position: absolute; background: rgba(0,0,0,0.8); color: white;
-            padding: 5px 10px; border-radius: 5px; font-size: 12px;
-            pointer-events: none; z-index: 100; white-space: nowrap;
-        }
-        @media (max-width: 968px) {
-            .main-content { grid-template-columns: 1fr; }
-            .info-panel { max-height: none; }
-            header h1 { font-size: 1.8em; }
-        }
+        @media (max-width: 968px) { .main-content { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -94,10 +55,9 @@
         <div class="main-content">
             <div class="map-container">
                 <div class="china-map">
-                    <svg viewBox="0 0 1050 600" xmlns="http://www.w3.org/2000/svg">
-                        <g id="provinces">
-                            <!-- 省份 SVG 路径将通过 JS 动态生成 -->
-                        </g>
+                    <img src="china-map.jpg" alt="中国地图">
+                    <svg viewBox="0 0 595.28 504" xmlns="http://www.w3.org/2000/svg" class="province-overlay" id="provinceSvg">
+                        <!-- 省份路径将通过 JS 加载 -->
                     </svg>
                     <div id="tooltip" class="tooltip" style="display:none;"></div>
                 </div>
@@ -116,310 +76,127 @@
         <div class="modal-content" id="modalImage"></div>
     </div>
     <script>
-        // 各省美食数据
         const provinceFoods = {
-            beijing: { name: "北京", foods: [
-                { name: "北京烤鸭", emoji: "🦆", desc: "皮脆肉嫩" },
-                { name: "炸酱面", emoji: "🍜", desc: "老北京传统面食" },
-                { name: "豆汁儿", emoji: "🥛", desc: "特色发酵豆制品" },
-                { name: "驴打滚", emoji: "🍰", desc: "糯米豆沙卷" }
-            ]},
-            tianjin: { name: "天津", foods: [
-                { name: "狗不理包子", emoji: "🥟", desc: "皮薄馅大" },
-                { name: "煎饼果子", emoji: "🥞", desc: "绿豆面糊夹油条" },
-                { name: "耳朵眼炸糕", emoji: "🍩", desc: "外酥里嫩" },
-                { name: "麻花", emoji: "🥐", desc: "酥脆香甜" }
-            ]},
-            hebei: { name: "河北", foods: [
-                { name: "驴肉火烧", emoji: "🫓", desc: "保定特色" },
-                { name: "正定八大碗", emoji: "🍲", desc: "传统宴席" },
-                { name: "承德避暑山庄菜", emoji: "🍽️", desc: "宫廷风味" },
-                { name: "唐山麻糖", emoji: "🍬", desc: "酥脆香甜" }
-            ]},
-            shanxi: { name: "山西", foods: [
-                { name: "刀削面", emoji: "🍜", desc: "面条劲道" },
-                { name: "平遥牛肉", emoji: "🥩", desc: "色泽红润" },
-                { name: "莜面栲栳栳", emoji: "🍜", desc: "莜面制成" },
-                { name: "陈醋", emoji: "🍶", desc: "四大名醋之首" }
-            ]},
-            inner_mongolia: { name: "内蒙古", foods: [
-                { name: "手扒羊肉", emoji: "🐑", desc: "原汁原味" },
-                { name: "烤全羊", emoji: "🐑", desc: "宴席大菜" },
-                { name: "奶茶", emoji: "🧋", desc: "咸香浓郁" },
-                { name: "奶豆腐", emoji: "🧀", desc: "奶香浓郁" }
-            ]},
-            liaoning: { name: "辽宁", foods: [
-                { name: "锅包肉", emoji: "🥩", desc: "外酥里嫩" },
-                { name: "小鸡炖蘑菇", emoji: "🍲", desc: "东北家常菜" },
-                { name: "猪肉炖粉条", emoji: "🍖", desc: "东北四大炖" },
-                { name: "大连海鲜", emoji: "🦐", desc: "新鲜海产" }
-            ]},
-            jilin: { name: "吉林", foods: [
-                { name: "朝鲜冷面", emoji: "🍜", desc: "酸甜辣凉" },
-                { name: "人参鸡汤", emoji: "🐔", desc: "滋补养生" },
-                { name: "延吉烧烤", emoji: "🍖", desc: "朝鲜族风味" },
-                { name: "酸菜白肉", emoji: "🥬", desc: "东北特色" }
-            ]},
-            heilongjiang: { name: "黑龙江", foods: [
-                { name: "哈尔滨红肠", emoji: "🌭", desc: "俄式风味" },
-                { name: "锅包肉", emoji: "🥩", desc: "起源哈尔滨" },
-                { name: "得莫利炖鱼", emoji: "🐟", desc: "鱼肉鲜嫩" },
-                { name: "大列巴", emoji: "🍞", desc: "俄式面包" }
-            ]},
-            shanghai: { name: "上海", foods: [
-                { name: "小笼包", emoji: "🥟", desc: "皮薄汁多" },
-                { name: "生煎包", emoji: "🥠", desc: "底部酥脆" },
-                { name: "红烧肉", emoji: "🥩", desc: "浓油赤酱" },
-                { name: "蟹粉豆腐", emoji: "🦀", desc: "鲜嫩滑爽" }
-            ]},
-            jiangsu: { name: "江苏", foods: [
-                { name: "松鼠桂鱼", emoji: "🐟", desc: "形似松鼠" },
-                { name: "盐水鸭", emoji: "🦆", desc: "皮白肉嫩" },
-                { name: "阳澄湖大闸蟹", emoji: "🦀", desc: "蟹黄饱满" },
-                { name: "狮子头", emoji: "🍖", desc: "肉丸松软" }
-            ]},
-            zhejiang: { name: "浙江", foods: [
-                { name: "东坡肉", emoji: "🥩", desc: "肥而不腻" },
-                { name: "西湖醋鱼", emoji: "🐟", desc: "酸甜清香" },
-                { name: "龙井虾仁", emoji: "🍤", desc: "茶香四溢" },
-                { name: "叫花鸡", emoji: "🐔", desc: "泥烤制" }
-            ]},
-            anhui: { name: "安徽", foods: [
-                { name: "臭鳜鱼", emoji: "🐟", desc: "闻臭吃香" },
-                { name: "毛豆腐", emoji: "🧀", desc: "发酵豆腐" },
-                { name: "黄山烧饼", emoji: "🫓", desc: "酥脆掉渣" },
-                { name: "李鸿章杂烩", emoji: "🍲", desc: "食材丰富" }
-            ]},
-            fujian: { name: "福建", foods: [
-                { name: "佛跳墙", emoji: "🍲", desc: "山珍海味" },
-                { name: "沙县小吃", emoji: "🥟", desc: "拌面扁肉" },
-                { name: "土笋冻", emoji: "🧊", desc: "闽南特色" },
-                { name: "荔枝肉", emoji: "🥩", desc: "酸甜可口" }
-            ]},
-            jiangxi: { name: "江西", foods: [
-                { name: "瓦罐汤", emoji: "🍲", desc: "慢火煨制" },
-                { name: "拌粉", emoji: "🍜", desc: "米粉爽滑" },
-                { name: "藜蒿炒腊肉", emoji: "🥓", desc: "鄱阳湖特色" },
-                { name: "三杯鸡", emoji: "🐔", desc: "经典赣菜" }
-            ]},
-            shandong: { name: "山东", foods: [
-                { name: "鲁菜", emoji: "🍽️", desc: "八大菜系之首" },
-                { name: "煎饼卷大葱", emoji: "🫓", desc: "山东特色" },
-                { name: "九转大肠", emoji: "🥘", desc: "色泽红润" },
-                { name: "糖醋鲤鱼", emoji: "🐟", desc: "外酥里嫩" }
-            ]},
-            henan: { name: "河南", foods: [
-                { name: "烩面", emoji: "🍜", desc: "汤宽面劲" },
-                { name: "胡辣汤", emoji: "🍲", desc: "香辣开胃" },
-                { name: "开封灌汤包", emoji: "🥟", desc: "汤汁丰富" },
-                { name: "道口烧鸡", emoji: "🐔", desc: "肉质酥烂" }
-            ]},
-            hubei: { name: "湖北", foods: [
-                { name: "热干面", emoji: "🍜", desc: "芝麻酱香浓" },
-                { name: "清蒸武昌鱼", emoji: "🐟", desc: "肉质细嫩" },
-                { name: "莲藕排骨汤", emoji: "🍲", desc: "藕香浓郁" },
-                { name: "三鲜豆皮", emoji: "🥞", desc: "外脆内软" }
-            ]},
-            hunan: { name: "湖南", foods: [
-                { name: "剁椒鱼头", emoji: "🐟", desc: "鲜辣适口" },
-                { name: "辣椒炒肉", emoji: "🌶️", desc: "香辣下饭" },
-                { name: "臭豆腐", emoji: "⬛", desc: "闻臭吃香" },
-                { name: "糖油粑粑", emoji: "🍡", desc: "软糯香甜" }
-            ]},
-            guangdong: { name: "广东", foods: [
-                { name: "早茶点心", emoji: "🍵", desc: "虾饺烧卖" },
-                { name: "烧鹅", emoji: "🦢", desc: "皮脆肉嫩" },
-                { name: "白切鸡", emoji: "🐔", desc: "原汁原味" },
-                { name: "肠粉", emoji: "🍲", desc: "米浆蒸制" }
-            ]},
-            guangxi: { name: "广西", foods: [
-                { name: "螺蛳粉", emoji: "🍜", desc: "酸辣鲜爽" },
-                { name: "桂林米粉", emoji: "🍜", desc: "卤水香浓" },
-                { name: "老友粉", emoji: "🍲", desc: "南宁特色" },
-                { name: "柠檬鸭", emoji: "🦆", desc: "酸辣鲜香" }
-            ]},
-            hainan: { name: "海南", foods: [
-                { name: "文昌鸡", emoji: "🐔", desc: "四大名菜之首" },
-                { name: "加积鸭", emoji: "🦆", desc: "肥而不腻" },
-                { name: "东山羊", emoji: "🐐", desc: "肉质细嫩" },
-                { name: "和乐蟹", emoji: "🦀", desc: "膏满肉肥" }
-            ]},
-            chongqing: { name: "重庆", foods: [
-                { name: "重庆火锅", emoji: "🍲", desc: "麻辣鲜香" },
-                { name: "小面", emoji: "🍜", desc: "麻辣味足" },
-                { name: "酸辣粉", emoji: "🍜", desc: "酸辣开胃" },
-                { name: "毛血旺", emoji: "🍲", desc: "食材丰富" }
-            ]},
-            sichuan: { name: "四川", foods: [
-                { name: "麻婆豆腐", emoji: "🌶️", desc: "麻辣鲜香" },
-                { name: "火锅", emoji: "🍲", desc: "麻辣鲜香" },
-                { name: "回锅肉", emoji: "🥓", desc: "香辣下饭" },
-                { name: "担担面", emoji: "🍜", desc: "麻辣味浓" }
-            ]},
-            guizhou: { name: "贵州", foods: [
-                { name: "酸汤鱼", emoji: "🐟", desc: "酸辣鲜香" },
-                { name: "丝娃娃", emoji: "🌯", desc: "素菜卷饼" },
-                { name: "肠旺面", emoji: "🍜", desc: "麻辣鲜香" },
-                { name: "老干妈", emoji: "🌶️", desc: "国民辣酱" }
-            ]},
-            yunnan: { name: "云南", foods: [
-                { name: "过桥米线", emoji: "🍜", desc: "汤鲜料足" },
-                { name: "宣威火腿", emoji: "🥓", desc: "香气浓郁" },
-                { name: "野生菌火锅", emoji: "🍄", desc: "山珍美味" },
-                { name: "鲜花饼", emoji: "🥮", desc: "玫瑰花瓣馅" }
-            ]},
-            tibet: { name: "西藏", foods: [
-                { name: "酥油茶", emoji: "🧋", desc: "藏族特色" },
-                { name: "青稞酒", emoji: "🍶", desc: "清香醇厚" },
-                { name: "糌粑", emoji: "🍚", desc: "青稞炒面" },
-                { name: "牦牛肉", emoji: "🥩", desc: "高原特色" }
-            ]},
-            shaanxi: { name: "陕西", foods: [
-                { name: "肉夹馍", emoji: "🥙", desc: "腊汁肉夹馍" },
-                { name: "羊肉泡馍", emoji: "🍲", desc: "馍酥肉烂" },
-                { name: "凉皮", emoji: "🍜", desc: "酸辣爽口" },
-                { name: "biangbiang 面", emoji: "🍜", desc: "宽面劲道" }
-            ]},
-            gansu: { name: "甘肃", foods: [
-                { name: "兰州牛肉面", emoji: "🍜", desc: "一清二白三红四绿" },
-                { name: "羊肉串", emoji: "🍖", desc: "西北风味" },
-                { name: "酿皮", emoji: "🍜", desc: "酸辣爽口" },
-                { name: "灰豆子", emoji: "🫘", desc: "香甜软糯" }
-            ]},
-            qinghai: { name: "青海", foods: [
-                { name: "手抓羊肉", emoji: "🐑", desc: "高原羊肉" },
-                { name: "酸奶", emoji: "🥛", desc: "牦牛奶制成" },
-                { name: "尕面片", emoji: "🍜", desc: "手工面片" },
-                { name: "甜醅", emoji: "🍚", desc: "青稞发酵" }
-            ]},
-            ningxia: { name: "宁夏", foods: [
-                { name: "手抓羊肉", emoji: "🐑", desc: "肉质细嫩" },
-                { name: "羊肉泡馍", emoji: "🍲", desc: "汤浓肉烂" },
-                { name: "八宝茶", emoji: "🍵", desc: "配料丰富" },
-                { name: "烩小吃", emoji: "🍲", desc: "味道鲜美" }
-            ]},
-            xinjiang: { name: "新疆", foods: [
-                { name: "烤羊肉串", emoji: "🍖", desc: "孜然飘香" },
-                { name: "大盘鸡", emoji: "🐔", desc: "土豆软糯" },
-                { name: "手抓饭", emoji: "🍚", desc: "香气扑鼻" },
-                { name: "馕", emoji: "🫓", desc: "传统面饼" }
-            ]},
-            taiwan: { name: "台湾", foods: [
-                { name: "蚵仔煎", emoji: "🦪", desc: "台湾特色小吃" },
-                { name: "牛肉面", emoji: "🍜", desc: "台湾风味" },
-                { name: "珍珠奶茶", emoji: "🧋", desc: "源自台湾" },
-                { name: "凤梨酥", emoji: "🥮", desc: "台湾名产" }
-            ]}
+            beijing: { name: "北京", foods: [{ name: "北京烤鸭", emoji: "🦆", desc: "皮脆肉嫩" }, { name: "炸酱面", emoji: "🍜", desc: "老北京传统" }, { name: "豆汁儿", emoji: "🥛", desc: "特色豆制品" }, { name: "驴打滚", emoji: "🍰", desc: "糯米豆沙卷" }] },
+            tianjin: { name: "天津", foods: [{ name: "狗不理包子", emoji: "🥟", desc: "皮薄馅大" }, { name: "煎饼果子", emoji: "🥞", desc: "绿豆面糊" }, { name: "耳朵眼炸糕", emoji: "🍩", desc: "外酥里嫩" }, { name: "麻花", emoji: "🥐", desc: "酥脆香甜" }] },
+            hebei: { name: "河北", foods: [{ name: "驴肉火烧", emoji: "🫓", desc: "保定特色" }, { name: "正定八大碗", emoji: "🍲", desc: "传统宴席" }, { name: "承德山庄菜", emoji: "🍽️", desc: "宫廷风味" }, { name: "唐山麻糖", emoji: "🍬", desc: "酥脆香甜" }] },
+            shanxi: { name: "山西", foods: [{ name: "刀削面", emoji: "🍜", desc: "面条劲道" }, { name: "平遥牛肉", emoji: "🥩", desc: "色泽红润" }, { name: "莜面栲栳栳", emoji: "🍜", desc: "莜面制成" }, { name: "陈醋", emoji: "🍶", desc: "四大名醋" }] },
+            inner_mongolia: { name: "内蒙古", foods: [{ name: "手扒羊肉", emoji: "🐑", desc: "原汁原味" }, { name: "烤全羊", emoji: "🐑", desc: "宴席大菜" }, { name: "奶茶", emoji: "🧋", desc: "咸香浓郁" }, { name: "奶豆腐", emoji: "🧀", desc: "奶香浓郁" }] },
+            liaoning: { name: "辽宁", foods: [{ name: "锅包肉", emoji: "🥩", desc: "外酥里嫩" }, { name: "小鸡炖蘑菇", emoji: "🍲", desc: "东北家常" }, { name: "猪肉炖粉条", emoji: "🍖", desc: "东北四大炖" }, { name: "大连海鲜", emoji: "🦐", desc: "新鲜海产" }] },
+            jilin: { name: "吉林", foods: [{ name: "朝鲜冷面", emoji: "🍜", desc: "酸甜辣凉" }, { name: "人参鸡汤", emoji: "🐔", desc: "滋补养生" }, { name: "延吉烧烤", emoji: "🍖", desc: "朝鲜风味" }, { name: "酸菜白肉", emoji: "🥬", desc: "东北特色" }] },
+            heilongjiang: { name: "黑龙江", foods: [{ name: "哈尔滨红肠", emoji: "🌭", desc: "俄式风味" }, { name: "锅包肉", emoji: "🥩", desc: "起源哈尔滨" }, { name: "得莫利炖鱼", emoji: "🐟", desc: "鱼肉鲜嫩" }, { name: "大列巴", emoji: "🍞", desc: "俄式面包" }] },
+            shanghai: { name: "上海", foods: [{ name: "小笼包", emoji: "🥟", desc: "皮薄汁多" }, { name: "生煎包", emoji: "🥠", desc: "底部酥脆" }, { name: "红烧肉", emoji: "🥩", desc: "浓油赤酱" }, { name: "蟹粉豆腐", emoji: "🦀", desc: "鲜嫩滑爽" }] },
+            jiangsu: { name: "江苏", foods: [{ name: "松鼠桂鱼", emoji: "🐟", desc: "形似松鼠" }, { name: "盐水鸭", emoji: "🦆", desc: "皮白肉嫩" }, { name: "阳澄湖大闸蟹", emoji: "🦀", desc: "蟹黄饱满" }, { name: "狮子头", emoji: "🍖", desc: "肉丸松软" }] },
+            zhejiang: { name: "浙江", foods: [{ name: "东坡肉", emoji: "🥩", desc: "肥而不腻" }, { name: "西湖醋鱼", emoji: "🐟", desc: "酸甜清香" }, { name: "龙井虾仁", emoji: "🍤", desc: "茶香四溢" }, { name: "叫花鸡", emoji: "🐔", desc: "泥烤制" }] },
+            anhui: { name: "安徽", foods: [{ name: "臭鳜鱼", emoji: "🐟", desc: "闻臭吃香" }, { name: "毛豆腐", emoji: "🧀", desc: "发酵豆腐" }, { name: "黄山烧饼", emoji: "🫓", desc: "酥脆掉渣" }, { name: "李鸿章杂烩", emoji: "🍲", desc: "食材丰富" }] },
+            fujian: { name: "福建", foods: [{ name: "佛跳墙", emoji: "🍲", desc: "山珍海味" }, { name: "沙县小吃", emoji: "🥟", desc: "拌面扁肉" }, { name: "土笋冻", emoji: "🧊", desc: "闽南特色" }, { name: "荔枝肉", emoji: "🥩", desc: "酸甜可口" }] },
+            jiangxi: { name: "江西", foods: [{ name: "瓦罐汤", emoji: "🍲", desc: "慢火煨制" }, { name: "拌粉", emoji: "🍜", desc: "米粉爽滑" }, { name: "藜蒿炒腊肉", emoji: "🥓", desc: "鄱阳湖特色" }, { name: "三杯鸡", emoji: "🐔", desc: "经典赣菜" }] },
+            shandong: { name: "山东", foods: [{ name: "鲁菜", emoji: "🍽️", desc: "八大菜系之首" }, { name: "煎饼卷大葱", emoji: "🫓", desc: "山东特色" }, { name: "九转大肠", emoji: "🥘", desc: "色泽红润" }, { name: "糖醋鲤鱼", emoji: "🐟", desc: "外酥里嫩" }] },
+            henan: { name: "河南", foods: [{ name: "烩面", emoji: "🍜", desc: "汤宽面劲" }, { name: "胡辣汤", emoji: "🍲", desc: "香辣开胃" }, { name: "开封灌汤包", emoji: "🥟", desc: "汤汁丰富" }, { name: "道口烧鸡", emoji: "🐔", desc: "肉质酥烂" }] },
+            hubei: { name: "湖北", foods: [{ name: "热干面", emoji: "🍜", desc: "芝麻酱香" }, { name: "清蒸武昌鱼", emoji: "🐟", desc: "肉质细嫩" }, { name: "莲藕排骨汤", emoji: "🍲", desc: "藕香浓郁" }, { name: "三鲜豆皮", emoji: "🥞", desc: "外脆内软" }] },
+            hunan: { name: "湖南", foods: [{ name: "剁椒鱼头", emoji: "🐟", desc: "鲜辣适口" }, { name: "辣椒炒肉", emoji: "🌶️", desc: "香辣下饭" }, { name: "臭豆腐", emoji: "⬛", desc: "闻臭吃香" }, { name: "糖油粑粑", emoji: "🍡", desc: "软糯香甜" }] },
+            guangdong: { name: "广东", foods: [{ name: "早茶点心", emoji: "🍵", desc: "虾饺烧卖" }, { name: "烧鹅", emoji: "🦢", desc: "皮脆肉嫩" }, { name: "白切鸡", emoji: "🐔", desc: "原汁原味" }, { name: "肠粉", emoji: "🍲", desc: "米浆蒸制" }] },
+            guangxi: { name: "广西", foods: [{ name: "螺蛳粉", emoji: "🍜", desc: "酸辣鲜爽" }, { name: "桂林米粉", emoji: "🍜", desc: "卤水香浓" }, { name: "老友粉", emoji: "🍲", desc: "南宁特色" }, { name: "柠檬鸭", emoji: "🦆", desc: "酸辣鲜香" }] },
+            hainan: { name: "海南", foods: [{ name: "文昌鸡", emoji: "🐔", desc: "四大名菜" }, { name: "加积鸭", emoji: "🦆", desc: "肥而不腻" }, { name: "东山羊", emoji: "🐐", desc: "肉质细嫩" }, { name: "和乐蟹", emoji: "🦀", desc: "膏满肉肥" }] },
+            chongqing: { name: "重庆", foods: [{ name: "重庆火锅", emoji: "🍲", desc: "麻辣鲜香" }, { name: "小面", emoji: "🍜", desc: "麻辣味足" }, { name: "酸辣粉", emoji: "🍜", desc: "酸辣开胃" }, { name: "毛血旺", emoji: "🍲", desc: "食材丰富" }] },
+            sichuan: { name: "四川", foods: [{ name: "麻婆豆腐", emoji: "🌶️", desc: "麻辣鲜香" }, { name: "火锅", emoji: "🍲", desc: "麻辣鲜香" }, { name: "回锅肉", emoji: "🥓", desc: "香辣下饭" }, { name: "担担面", emoji: "🍜", desc: "麻辣味浓" }] },
+            guizhou: { name: "贵州", foods: [{ name: "酸汤鱼", emoji: "🐟", desc: "酸辣鲜香" }, { name: "丝娃娃", emoji: "🌯", desc: "素菜卷饼" }, { name: "肠旺面", emoji: "🍜", desc: "麻辣鲜香" }, { name: "老干妈", emoji: "🌶️", desc: "国民辣酱" }] },
+            yunnan: { name: "云南", foods: [{ name: "过桥米线", emoji: "🍜", desc: "汤鲜料足" }, { name: "宣威火腿", emoji: "🥓", desc: "香气浓郁" }, { name: "野生菌火锅", emoji: "🍄", desc: "山珍美味" }, { name: "鲜花饼", emoji: "🥮", desc: "玫瑰花瓣" }] },
+            tibet: { name: "西藏", foods: [{ name: "酥油茶", emoji: "🧋", desc: "藏族特色" }, { name: "青稞酒", emoji: "🍶", desc: "清香醇厚" }, { name: "糌粑", emoji: "🍚", desc: "青稞炒面" }, { name: "牦牛肉", emoji: "🥩", desc: "高原特色" }] },
+            shaanxi: { name: "陕西", foods: [{ name: "肉夹馍", emoji: "🥙", desc: "腊汁肉夹馍" }, { name: "羊肉泡馍", emoji: "🍲", desc: "馍酥肉烂" }, { name: "凉皮", emoji: "🍜", desc: "酸辣爽口" }, { name: "biangbiang 面", emoji: "🍜", desc: "宽面劲道" }] },
+            gansu: { name: "甘肃", foods: [{ name: "兰州牛肉面", emoji: "🍜", desc: "一清二白" }, { name: "羊肉串", emoji: "🍖", desc: "西北风味" }, { name: "酿皮", emoji: "🍜", desc: "酸辣爽口" }, { name: "灰豆子", emoji: "🫘", desc: "香甜软糯" }] },
+            qinghai: { name: "青海", foods: [{ name: "手抓羊肉", emoji: "🐑", desc: "高原羊肉" }, { name: "酸奶", emoji: "🥛", desc: "牦牛奶" }, { name: "尕面片", emoji: "🍜", desc: "手工面片" }, { name: "甜醅", emoji: "🍚", desc: "青稞发酵" }] },
+            ningxia: { name: "宁夏", foods: [{ name: "手抓羊肉", emoji: "🐑", desc: "肉质细嫩" }, { name: "羊肉泡馍", emoji: "🍲", desc: "汤浓肉烂" }, { name: "八宝茶", emoji: "🍵", desc: "配料丰富" }, { name: "烩小吃", emoji: "🍲", desc: "味道鲜美" }] },
+            xinjiang: { name: "新疆", foods: [{ name: "烤羊肉串", emoji: "🍖", desc: "孜然飘香" }, { name: "大盘鸡", emoji: "🐔", desc: "土豆软糯" }, { name: "手抓饭", emoji: "🍚", desc: "香气扑鼻" }, { name: "馕", emoji: "🫓", desc: "传统面饼" }] },
+            taiwan: { name: "台湾", foods: [{ name: "蚵仔煎", emoji: "🦪", desc: "台湾小吃" }, { name: "牛肉面", emoji: "🍜", desc: "台湾风味" }, { name: "珍珠奶茶", emoji: "🧋", desc: "源自台湾" }, { name: "凤梨酥", emoji: "🥮", desc: "台湾名产" }] }
         };
 
-        // 简化的省份路径（使用多边形近似省份轮廓）
+        // 简化的省份路径数据（用于 overlay）
         const provincePaths = {
-            xinjiang: "M100,150 L250,130 L280,180 L250,250 L200,280 L150,250 L100,200 Z",
-            tibet: "M150,280 L250,280 L300,320 L280,380 L220,400 L180,380 L150,320 Z",
-            qinghai: "M250,250 L300,240 L320,280 L300,320 L250,300 Z",
-            gansu: "M280,180 L350,170 L380,200 L350,240 L300,240 L280,200 Z",
-            ningxia: "M340,200 L360,195 L365,215 L345,220 Z",
-            inner_mongolia: "M300,100 L500,90 L550,120 L520,160 L450,170 L350,170 L300,140 Z",
-            heilongjiang: "M650,50 L750,40 L780,80 L750,130 L680,120 L650,80 Z",
-            jilin: "M680,120 L750,130 L740,170 L700,180 L680,150 Z",
-            liaoning: "M700,180 L740,170 L760,210 L730,240 L700,220 Z",
-            beijing: "M520,140 L540,135 L545,155 L525,160 Z",
-            tianjin: "M545,155 L560,150 L565,170 L550,175 Z",
-            hebei: "M500,130 L580,120 L600,160 L570,200 L520,190 L500,160 Z",
-            shanxi: "M480,170 L520,160 L540,200 L520,240 L480,230 Z",
-            shandong: "M570,200 L630,190 L650,230 L620,270 L580,260 Z",
-            henan: "M480,230 L540,220 L560,260 L530,290 L490,280 Z",
-            shaanxi: "M420,200 L480,190 L500,230 L470,270 L430,260 Z",
-            sichuan: "M350,240 L430,230 L470,270 L450,330 L400,350 L360,320 Z",
-            chongqing: "M430,300 L460,295 L465,320 L435,325 Z",
-            guizhou: "M420,340 L470,330 L490,370 L460,400 L420,380 Z",
-            yunnan: "M360,350 L420,340 L450,380 L430,430 L380,440 L350,400 Z",
-            guangxi: "M450,400 L520,390 L540,430 L510,470 L460,460 Z",
-            guangdong: "M540,430 L620,420 L640,460 L610,500 L560,490 Z",
-            hainan: "M580,520 L610,515 L615,540 L585,545 Z",
-            hunan: "M490,340 L550,330 L570,370 L540,410 L500,400 Z",
-            hubei: "M450,290 L520,280 L540,320 L510,360 L460,350 Z",
-            jiangxi: "M540,340 L590,330 L610,370 L580,410 L540,390 Z",
-            anhui: "M560,280 L610,270 L630,310 L600,350 L560,340 Z",
-            jiangsu: "M600,270 L650,260 L670,300 L640,340 L600,330 Z",
-            zhejiang: "M620,340 L670,330 L690,370 L660,400 L620,380 Z",
-            shanghai: "M670,300 L685,295 L690,315 L675,320 Z",
-            fujian: "M640,380 L680,370 L700,420 L670,450 L640,430 Z",
-            taiwan: "M720,420 L750,410 L760,450 L730,460 Z"
+            xinjiang: "M80,120 L200,100 L230,150 L200,220 L150,240 L100,200 Z",
+            tibet: "M120,250 L220,240 L260,290 L230,360 L170,370 L130,330 Z",
+            qinghai: "M200,220 L250,210 L270,250 L240,280 L200,260 Z",
+            gansu: "M230,150 L300,140 L320,180 L290,210 L250,210 L230,170 Z",
+            sichuan: "M260,280 L340,270 L370,320 L340,380 L280,370 L260,320 Z",
+            yunnan: "M240,360 L300,350 L330,400 L300,450 L250,440 L230,390 Z",
+            guizhou: "M320,340 L370,330 L390,370 L360,410 L320,400 Z",
+            guangxi: "M350,400 L420,390 L440,430 L410,470 L360,460 Z",
+            guangdong: "M420,430 L500,420 L520,460 L490,500 L440,490 Z",
+            hainan: "M460,520 L490,515 L495,540 L465,545 Z",
+            hunan: "M380,330 L440,320 L460,360 L430,400 L390,390 Z",
+            hubei: "M340,290 L410,280 L430,320 L400,360 L350,350 Z",
+            jiangxi: "M430,340 L480,330 L500,370 L470,410 L430,400 Z",
+            anhui: "M460,290 L510,280 L530,320 L500,360 L460,350 Z",
+            jiangsu: "M500,280 L550,270 L570,310 L540,350 L500,340 Z",
+            zhejiang: "M520,350 L570,340 L590,380 L560,410 L520,400 Z",
+            fujian: "M540,400 L580,390 L600,440 L570,470 L540,450 Z",
+            taiwan: "M610,430 L640,420 L650,460 L620,470 Z",
+            shanghai: "M570,310 L585,305 L590,325 L575,330 Z",
+            shandong: "M520,220 L580,210 L600,250 L570,290 L530,280 Z",
+            henan: "M420,260 L480,250 L500,290 L470,320 L430,310 Z",
+            shanxi: "M400,210 L440,200 L460,240 L430,280 L400,270 Z",
+            hebei: "M460,190 L520,180 L540,220 L510,260 L470,250 Z",
+            beijing: "M480,195 L500,190 L505,210 L485,215 Z",
+            tianjin: "M505,210 L520,205 L525,225 L510,230 Z",
+            inner_mongolia: "M250,80 L450,70 L500,100 L470,150 L400,160 L300,150 L250,120 Z",
+            liaoning: "M560,180 L600,170 L620,210 L590,250 L560,230 Z",
+            jilin: "M580,130 L620,120 L640,160 L610,200 L580,180 Z",
+            heilongjiang: "M600,60 L680,50 L710,100 L680,160 L620,150 L600,100 Z",
+            shaanxi: "M360,230 L420,220 L440,260 L410,300 L370,290 Z",
+            ningxia: "M330,200 L350,195 L355,220 L335,225 Z"
         };
 
-        // 创建省份 SVG 路径
-        function createProvincePaths() {
-            const provincesGroup = document.getElementById('provinces');
+        function initProvinces() {
+            const svg = document.getElementById('provinceSvg');
             const tooltip = document.getElementById('tooltip');
-
-            Object.keys(provincePaths).forEach(provinceId => {
-                const province = provinceFoods[provinceId];
+            Object.keys(provincePaths).forEach(id => {
+                const province = provinceFoods[id];
                 if (!province) return;
-
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                path.setAttribute("d", provincePaths[provinceId]);
+                path.setAttribute("d", provincePaths[id]);
                 path.setAttribute("class", "province-path");
-                path.setAttribute("data-province", provinceId);
-                path.setAttribute("title", province.name);
-
-                // 悬停提示
+                path.setAttribute("data-province", id);
                 path.addEventListener('mouseenter', (e) => {
                     tooltip.style.display = 'block';
                     tooltip.textContent = province.name;
                 });
                 path.addEventListener('mousemove', (e) => {
-                    const rect = e.target.getBoundingClientRect();
                     tooltip.style.left = (e.clientX + 10) + 'px';
                     tooltip.style.top = (e.clientY + 10) + 'px';
                 });
-                path.addEventListener('mouseleave', () => {
-                    tooltip.style.display = 'none';
-                });
-
-                // 点击事件
+                path.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
                 path.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    showProvinceInfo(provinceId);
+                    showProvinceInfo(id);
                     document.querySelectorAll('.province-path').forEach(p => p.classList.remove('selected'));
                     this.classList.add('selected');
                 });
-
-                provincesGroup.appendChild(path);
+                svg.appendChild(path);
             });
         }
 
-        function showProvinceInfo(provinceId) {
-            const province = provinceFoods[provinceId];
+        function showProvinceInfo(id) {
+            const province = provinceFoods[id];
             const infoPanel = document.getElementById('infoPanel');
             if (!province) return;
-            let foodsHTML = province.foods.map(food => `
-                <div class="food-card" onclick="showFoodImage('${food.emoji}', '${food.name}')">
-                    <div class="food-image">${food.emoji}</div>
-                    <div class="food-name">${food.name}</div>
-                    <div class="food-desc">${food.desc}</div>
+            const foodsHTML = province.foods.map(f => `
+                <div class="food-card" onclick="showFoodImage('${f.emoji}', '${f.name}')">
+                    <div class="food-image">${f.emoji}</div>
+                    <div class="food-name">${f.name}</div>
+                    <div class="food-desc">${f.desc}</div>
                 </div>
             `).join('');
             infoPanel.innerHTML = `<h2>📍 ${province.name}美食</h2><div class="food-grid">${foodsHTML}</div>`;
         }
 
         function showFoodImage(emoji, name) {
-            const modal = document.getElementById('imageModal');
-            const modalContent = document.getElementById('modalImage');
-            modal.style.display = 'flex';
-            modalContent.innerHTML = emoji;
+            document.getElementById('imageModal').style.display = 'flex';
+            document.getElementById('modalImage').innerHTML = emoji;
         }
 
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('imageModal')) closeModal();
-        }
-
-        // 页面加载完成后创建省份路径
-        document.addEventListener('DOMContentLoaded', createProvincePaths);
+        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
+        window.onclick = (e) => { if (e.target == document.getElementById('imageModal')) closeModal(); };
+        document.addEventListener('DOMContentLoaded', initProvinces);
     </script>
 </body>
 </html>
