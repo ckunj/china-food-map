@@ -38,20 +38,12 @@
             position: absolute;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 107, 107, 0.15);
-            border: 1px solid rgba(255, 107, 107, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #ff4757;
-            font-weight: bold;
-            text-shadow: 0 0 2px white;
+            background: rgba(255, 107, 107, 0);
+            border: 2px solid transparent;
         }
         .province-overlay:hover {
-            background: rgba(255, 107, 107, 0.5);
+            background: rgba(255, 107, 107, 0.3);
             border-color: #ff6b6b;
-            z-index: 10;
         }
         .province-overlay.selected {
             background: rgba(255, 71, 87, 0.4);
@@ -342,48 +334,47 @@
             ]}
         };
 
-        // 省份点击区域配置 (百分比坐标，适配不同屏幕)
+        // 省份点击区域配置 (基于 GeoJSON 行政中心坐标)
         const provinceAreas = {
             // 西北
-            xinjiang: { left: 8, top: 25, width: 18, height: 22 },
-            gansu: { left: 28, top: 32, width: 14, height: 6 },
-            qinghai: { left: 22, top: 40, width: 10, height: 10 },
-            ningxia: { left: 38, top: 35, width: 2, height: 2 },
+            xinjiang: { left: 24, top: 26, width: 12, height: 10 }, // 新疆
+            gansu: { left: 50, top: 48, width: 8, height: 7 }, // 甘肃
+            qinghai: { left: 46, top: 47, width: 8, height: 7 }, // 青海
+            ningxia: { left: 54, top: 42, width: 3, height: 3 }, // 宁夏
             // 西南
-            tibet: { left: 15, top: 52, width: 16, height: 18 },
-            sichuan: { left: 35, top: 45, width: 10, height: 10 },
-            yunnan: { left: 32, top: 60, width: 8, height: 10 },
-            guizhou: { left: 44, top: 54, width: 6, height: 6 },
-            chongqing: { left: 42, top: 48, width: 3, height: 3 },
-            // 华北 - 内蒙古是狭长形状，从东北延伸到西北
-            inner_mongolia: { left: 30, top: 18, width: 35, height: 10 },
-            beijing: { left: 58, top: 28, width: 2, height: 2 },
-            tianjin: { left: 61, top: 28, width: 2, height: 2 },
-            hebei: { left: 56, top: 26, width: 7, height: 7 },
-            shanxi: { left: 53, top: 30, width: 4, height: 6 },
-            shandong: { left: 63, top: 30, width: 6, height: 5 },
+            tibet: { left: 29, top: 67, width: 12, height: 10 }, // 西藏
+            sichuan: { left: 50, top: 64, width: 8, height: 7 }, // 四川
+            yunnan: { left: 48, top: 80, width: 6, height: 6 }, // 云南
+            guizhou: { left: 54, top: 75, width: 5, height: 5 }, // 贵州
+            chongqing: { left: 54, top: 67, width: 3, height: 3 }, // 重庆
+            // 华北
+            inner_mongolia: { left: 62, top: 35, width: 15, height: 8 }, // 内蒙古
+            beijing: { left: 70, top: 37, width: 3, height: 3 }, // 北京
+            tianjin: { left: 71, top: 40, width: 3, height: 3 }, // 天津
+            hebei: { left: 67, top: 43, width: 6, height: 6 }, // 河北
+            shanxi: { left: 64, top: 43, width: 4, height: 5 }, // 山西
+            shandong: { left: 71, top: 47, width: 5, height: 5 }, // 山东
             // 东北
-            heilongjiang: { left: 78, top: 8, width: 10, height: 10 },
-            jilin: { left: 82, top: 18, width: 5, height: 6 },
-            liaoning: { left: 79, top: 24, width: 6, height: 6 },
+            heilongjiang: { left: 86, top: 21, width: 8, height: 7 }, // 黑龙江
+            jilin: { left: 84, top: 26, width: 5, height: 5 }, // 吉林
+            liaoning: { left: 81, top: 32, width: 5, height: 5 }, // 辽宁
             // 华中
-            shaanxi: { left: 45, top: 38, width: 6, height: 6 },
-            henan: { left: 53, top: 38, width: 7, height: 5 },
-            hubei: { left: 48, top: 44, width: 8, height: 7 },
-            hunan: { left: 53, top: 51, width: 7, height: 7 },
+            shaanxi: { left: 58, top: 54, width: 5, height: 5 }, // 陕西
+            henan: { left: 66, top: 52, width: 5, height: 5 }, // 河南
+            hubei: { left: 67, top: 64, width: 6, height: 6 }, // 湖北
+            hunan: { left: 64, top: 71, width: 6, height: 6 }, // 湖南
             // 华东
-            anhui: { left: 58, top: 44, width: 5, height: 5 },
-            jiangsu: { left: 64, top: 40, width: 5, height: 5 },
-            zhejiang: { left: 66, top: 46, width: 4, height: 4 },
-            shanghai: { left: 70, top: 42, width: 2, height: 2 },
-            jiangxi: { left: 61, top: 49, width: 5, height: 5 },
-            fujian: { left: 68, top: 52, width: 4, height: 6 },
-            // 华南 - 广东在南部沿海
-            guangdong: { left: 62, top: 62, width: 9, height: 8 },
-            guangxi: { left: 52, top: 60, width: 8, height: 8 },
-            hainan: { left: 62, top: 75, width: 4, height: 4 },
-            // 台湾
-            taiwan: { left: 82, top: 58, width: 4, height: 5 }
+            anhui: { left: 71, top: 61, width: 5, height: 5 }, // 安徽
+            jiangsu: { left: 74, top: 60, width: 5, height: 5 }, // 江苏
+            zhejiang: { left: 76, top: 65, width: 5, height: 5 }, // 浙江
+            shanghai: { left: 78, top: 62, width: 3, height: 3 }, // 上海
+            jiangxi: { left: 69, top: 70, width: 5, height: 5 }, // 江西
+            fujian: { left: 75, top: 77, width: 5, height: 5 }, // 福建
+            // 华南
+            guangdong: { left: 65, top: 85, width: 6, height: 6 }, // 广东
+            guangxi: { left: 57, top: 86, width: 6, height: 6 }, // 广西
+            hainan: { left: 60, top: 95, width: 4, height: 4 }, // 海南
+            taiwan: { left: 78, top: 84, width: 5, height: 5 } // 台湾
         };
 
         // 创建省份点击区域
